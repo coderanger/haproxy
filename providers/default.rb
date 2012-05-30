@@ -69,6 +69,12 @@ action :create do
 
   service "haproxy" do
     supports :restart => true, :status => true, :reload => true
-    action [:enable, :start]
+    action :enable
+  end
+
+  # Don't start the service until the end the run
+  ruby_block "haproxy service start" do
+    notifies :start, "service[haproxy]"
+    block { }
   end
 end
