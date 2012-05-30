@@ -31,6 +31,8 @@ def self.attribute(attr_name, opts={})
   if opts[:kind_of] && opts[:kind_of] < Chef::Resource
     resource_class = opts.delete(:kind_of)
   end
+  append = opts.delete(:append)
+  opts[:default] ||= [] if append
   super(attr_name, opts)
   if resource_class
     orig_method = instance_method(attr_name)
@@ -41,7 +43,11 @@ def self.attribute(attr_name, opts={})
         resource.instance_eval(&block) if block
         resource
       end
-      orig_method.bind(self).call(arg)
+      if append && arg
+        orig_method.bind(self).call << arg
+      else
+       orig_method.bind(self).call(arg)
+      end
     end
   end
 end
