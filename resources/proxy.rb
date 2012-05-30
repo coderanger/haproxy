@@ -64,3 +64,53 @@ class AppSession < Chef::Resource
 end
 
 attribute :appsession, :kind_of => AppSession, :section => [:listen, :backend]
+
+class Bind < Chef::Resource
+  attribute :address, :kind_of => String, :name_attribute => true
+  # Apply only to non-path addresses
+  attribute :interface, :kind_of => String
+  attribute :mss, :kind_of => Integer
+  attribute :transparent, :equal_to => [true, false], :default => false
+  attribute :bind_id, :kind_of => Integer
+  attribute :bind_name, :kind_of => String
+  attribute :defer_accept, :equal_to => [true, false], :default => false
+  attribute :accept_proxy, :equal_to => [true, false], :default => false
+  # Apply only to path addresses
+  attribute :mode, :kind_of => [String, Integer]
+  attribute :user, :kind_of => String
+  attribute :uid, :kind_of => Integer
+  attribute :group, :kind_of => String
+  attribute :gid, :kind_of => Integer
+
+  def to_cfg
+    cfg = ["bind #{address}"]
+    if address[0] == '/'
+      # Path-like
+      cfg << "mode #{mode.is_a?(Integer) ? "0" + mode.to_s(8) : mode}" if mode
+      # Don't allow both user and uid together (and ditto for group/gid)
+      if user
+        cfg << "user #{user}"
+      elsif uid
+        cfg << "uid #{uid}"
+      end
+      if group
+        cfg << "group #{group}"
+      elsif
+        cfg << "gid #{gid}"
+      end
+    else
+      # Network-like
+      cfg << "interface #{interface}" if interface
+      cfg << "mss #{mss}" if mss
+      cfg << "transparent" if transparent
+      cfg << "id #{bind_id}" if bind_id
+      cfg << "name #{bind_name}" if bind_name
+      cfg << "defer-accept" if defer_accept
+      cfg << "accept-proxy" if accept_proxy
+    end
+    cfg.join(' ')
+  end
+end
+
+attribute :bind, :kind_of => Bind, :section => [:frontend, :listen], :append => true
+
