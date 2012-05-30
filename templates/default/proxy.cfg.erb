@@ -1,6 +1,6 @@
 <%= @proxy.proxy_type %> <%= @proxy.name %>
   <% if @proxy.appsession -%>
-  appsession <%= @proxy.appsession.cookie %> len <%= @proxy.appsession.length %> timeout <%= @proxy.appsession.timeout %><% if @proxy.appsession.request_learn %> request-learn<% end %><% if @proxy.appsession.prefix %> prefix<% end %><% if @proxy.appsession.mode %> mode <%= @proxy.appsession.mode %><% end %>
+  <%= @proxy.appsession.to_cfg %>
   <% end -%>
   <% if @proxy.bind -%>
   <% @proxy.bind.each do |bind| -%>

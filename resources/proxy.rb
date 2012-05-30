@@ -61,6 +61,14 @@ class AppSession < Chef::Resource
   attribute :request_learn, :equal_to => [true, false], :default => true
   attribute :prefix, :equal_to => [true, false], :default => false
   attribute :mode, :equal_to => [:path_parameters, "path-parameters ", :query_string, "query-string"]
+
+  def to_cfg
+    cfg = ["appsession #{cookie} len #{length} timeout #{timeout}"]
+    cfg << "request-learn" if request_learn
+    cfg << "prefix" if prefix
+    cfg << "mode #{mode}" if mode
+    cfg.join(' ')
+  end
 end
 
 attribute :appsession, :kind_of => AppSession, :section => [:listen, :backend]
